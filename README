@@ -1,0 +1,17 @@
+Scraper written for HPNWW10: Transylvania.
+This means that some scripts are designed for specific admin patterns used in that game. User scraping in particular is dependent on the specific structure of sevenarts' first post.
+
+Configuration:
+config/__init__.py contains a constant named WEREWOLF_THREAD that is the address of the first page of the werewolf game thread on hipinion
+
+dbutils requires a DBUSER environment variable to be set that can be used by postgres' peer authentication to log in. If a different database backend is desired, replacing the references to psycopg2 in dbutils with whatever your engine requires should be fairly simple.
+
+write_users.py is a script that attempts to parse the users and roles out of the admin posts of the thread. It is highly dependent on the structure of sevenarts' roles and users posts in HPNWW10. It clears both roles and players before writing, so be ready to destroy your current data.
+
+get_posts.py is a script that scrapes all the posts currently in the thread and stores them in the post table. It will attempt to link posts to players. Any posts by non-players will not get added to the table. The name of the non-player poster will be printed to the console. This script has 2 modes: clear and rebuild, and pick up where the db leaves off. In the former mode it will clear the post table and scrape the thread from the beginning. In the latter it will start scraping at the maximum thread sequence ID present in the database currently.
+
+find_votes.py will scrape through all the posts imported in the db and attempt to find html that looks like a vote (in HPNWW10 this means a color block in a bold block). It will attempt to match the player in the vote with the player table. If this cannot be done, the vote is not counted. Some leniency is provided by the ALIASES dictionary that tells the scraper some alternative names for players that showed up in votes. Votes that match a player, but no known vote format are recorded as "non standard". HTML that appears to be a vote but has no matched player will have what looks like their player text printed to the console, but will not be inserted into the DB.
+
+Factions and Vote Types are stored in the DB as enums (named "faction" and "vote_type"). These obviously would change game to game.
+
+a sql file is included of the database schema.
